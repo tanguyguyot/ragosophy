@@ -3,3 +3,4 @@
 .venv
 cleaned/marcus_aurelius_paragraphs.csv
 documents/Pensees_moi_meme.pdf
+__pycache__
