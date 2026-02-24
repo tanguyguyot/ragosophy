@@ -1,7 +1,0 @@
-.env
-.env.*
-.venv
-cleaned/marcus_aurelius_paragraphs.csv
-documents/Pensees_moi_meme.pdf
-__pycache__
-opencode.json
