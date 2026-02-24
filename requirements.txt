@@ -1,0 +1,9 @@
+chromadb
+pandas
+python-dotenv
+openai
+sentence-transformers
+pymupdf
+gradio
+gTTS
+pydub

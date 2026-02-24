@@ -35,22 +35,18 @@ def text_to_speech(text):
     # Load the sound
     sound = AudioSegment.from_file("speeches/temp_response.mp3")
 
-    # 1. Slow it down (0.85x to 0.9x is the sweet spot for 'contemplative')
-    # This also naturally lowers the pitch slightly
+    # 1. Slow it down
     slow_sound = sound._spawn(sound.raw_data, overrides={
-        "frame_rate": int(sound.frame_rate * 0.88)
+        "frame_rate": int(sound.frame_rate * 0.95)
     }).set_frame_rate(sound.frame_rate)
 
-    # 2. Lower the pitch further (-2 to -4 semitones)
-    # Be careful: too low sounds like a demon, not a human.
-    deeper_voice = pitch_shift(slow_sound, -2)
+    # 2. Lower the pitch further 
+    deeper_voice = pitch_shift(slow_sound, -6)
 
-    # 3. Apply a more aggressive Low Pass Filter
-    # 2000Hz - 2500Hz removes the 'digital' sharpness of gTTS
+    # 3. Apply a more aggressive Low Pass Filter to remove some of the higher frequencies and add a 'muffled' quality
     old_voice = deeper_voice.low_pass_filter(2200)
 
-    # 4. Optional: Boost the gain slightly 
-    # Filtering often makes the audio quieter
+    # Filtering often makes the audio quieter so we can boost the volume slightly to compensate without losing the 'old' effect
     old_voice = old_voice + 3 
 
     old_voice.export("speeches/voix_vieux.mp3", format="mp3")
