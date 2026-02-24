@@ -70,8 +70,12 @@ ragosophy/
 
 ## Screenshots
 
-![Chat Example]("images/marc aurele examples.png")
-![Out of subject prompt example]("/images/luffy example.png")
+### Sample chat example
+![Chat Example](images/example1.png)
+
+
+### Using an out-of-context prompt.
+![Out of subject prompt example](images/example2.png)
 
 
 ## License
