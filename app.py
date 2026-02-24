@@ -8,7 +8,7 @@ from pydub import AudioSegment
 # filepath: /home/tguyot/PersonalCode/ragosophy/app.py
 
 # Initialize chatbot
-vector_db = VectorDatabase(embedding_model=SentenceTransformer("dangvantuan/sentence-camembert-base"))
+vector_db = VectorDatabase(embedding_model="dangvantuan/sentence-camembert-base")
 chatbot = MarcAureleChatbot(vector_db)
 
 answer_history = []
@@ -25,20 +25,33 @@ def pitch_shift(audio, semitones):
     return audio._spawn(audio.raw_data, overrides={'frame_rate': new_sample_rate}).set_frame_rate(audio.frame_rate)
 
 def text_to_speech(text):
-    """Convert text answer to speech."""
-    tts = gTTS(text, lang='fr', )
+    """Convert text answer to speech with an elderly stoic tone."""
+    if not text:
+        return None
+        
+    tts = gTTS(text, lang='fr')
     tts.save("speeches/temp_response.mp3")
 
-    # Making the voice sound older by applying a low-pass filter and slowing it down
+    # Load the sound
     sound = AudioSegment.from_file("speeches/temp_response.mp3")
 
+    # 1. Slow it down (0.85x to 0.9x is the sweet spot for 'contemplative')
+    # This also naturally lowers the pitch slightly
     slow_sound = sound._spawn(sound.raw_data, overrides={
-        "frame_rate": int(sound.frame_rate * 0.9)
+        "frame_rate": int(sound.frame_rate * 0.88)
     }).set_frame_rate(sound.frame_rate)
 
-    lower_voice = pitch_shift(slow_sound, -3)  # Shift pitch down by 3 semitones
-    old_voice = slow_sound.low_pass_filter(3000)
+    # 2. Lower the pitch further (-2 to -4 semitones)
+    # Be careful: too low sounds like a demon, not a human.
+    deeper_voice = pitch_shift(slow_sound, -2)
 
+    # 3. Apply a more aggressive Low Pass Filter
+    # 2000Hz - 2500Hz removes the 'digital' sharpness of gTTS
+    old_voice = deeper_voice.low_pass_filter(2200)
+
+    # 4. Optional: Boost the gain slightly 
+    # Filtering often makes the audio quieter
+    old_voice = old_voice + 3 
 
     old_voice.export("speeches/voix_vieux.mp3", format="mp3")
     return "speeches/voix_vieux.mp3"
@@ -79,9 +92,9 @@ with gr.Blocks(title="Marc Aurèle Chatbot") as demo:
             audio_output = gr.Audio(label="Audio Response")
             
             read_button.click(
-                fn=lambda: text_to_speech(read_last_answer() or ""),
-                outputs=audio_output
-            )
+            fn=lambda: (read_last_answer(), text_to_speech(read_last_answer() or "")),
+            outputs=[last_answer_display, audio_output]
+        )
 
 if __name__ == "__main__":
     demo.launch(share=False)
